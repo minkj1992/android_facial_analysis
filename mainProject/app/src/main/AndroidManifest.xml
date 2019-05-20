@@ -10,13 +10,15 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".fireBaseUi">
+        </activity>
+        <activity android:name=".GoogleSignInActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".GoogleSignInActivity" />
+
         <activity android:name=".LoginActivity">
         </activity>
         <activity android:name=".RegisterActivity" />
