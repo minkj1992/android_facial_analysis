@@ -36,10 +36,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_TAKE_PHOTO = 2222;
     private static final int REQUEST_TAKE_ALBUM = 3333;
     private static final int REQUEST_IMAGE_CROP = 4444;
-
     Button btn_capture,btn_album;
     ImageView iv_view;
-
     String mCurrentPhotoPath;
     Uri imageUri,photoUri,albumUri;
 
@@ -127,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, "사진이 앨범에 저장되었습니다.", Toast.LENGTH_SHORT).show();
     }
 
-    public void cropImage(){
+    public void cropImage(Uri photoUri){
         Log.i("cropImage","Call");
         Log.i("cropImage","photoURI:"+photoUri+"/albumURI:"+ albumUri);
 
@@ -205,8 +203,8 @@ public class MainActivity extends AppCompatActivity {
                             albumFile = createImageFile();
                             photoUri = data.getData();
                             albumUri = Uri.fromFile(albumFile);
-//                            cropImage();
-                            cropSingleImage(photoUri);
+                            cropImage(photoUri);
+
 
                         } catch (Exception e) {
                             Log.e("TAKE_ALBUM_SINGLE ERROR", e.toString());

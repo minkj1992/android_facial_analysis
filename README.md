@@ -60,3 +60,9 @@
     
 - `material design`
     - 디자인을 바꾸어준다.
+
+
+## 진행 사항
+
+### Cropper`
+`uCrop`를 사용하여 size 조절 부터 rotation 까지 모두 마무리 한다.
