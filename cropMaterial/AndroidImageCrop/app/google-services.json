@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "580413710614",
+    "firebase_url": "https://fir-ui-4330a.firebaseio.com",
+    "project_id": "fir-ui-4330a",
+    "storage_bucket": "fir-ui-4330a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:580413710614:android:358d9e1eff6643bc",
+        "android_client_info": {
+          "package_name": "spartons.com.imagecropper"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "580413710614-0kk7k5i9ju0lv6v8mmrgc4j7d6j7nao4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "spartons.com.imagecropper",
+            "certificate_hash": "8502b7261d12d65fe4e2e134064f5d513ef42eb6"
+          }
+        },
+        {
+          "client_id": "580413710614-9jb2o5jh07np2i0ncf0ea7dkak52bgpa.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA59ulydigrG62jlI0ryMgiqy-5wdvh5gk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "580413710614-9jb2o5jh07np2i0ncf0ea7dkak52bgpa.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

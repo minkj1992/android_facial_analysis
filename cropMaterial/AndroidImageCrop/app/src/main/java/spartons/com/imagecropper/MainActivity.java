@@ -17,8 +17,14 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.firebase.ui.auth.AuthUI;
+import com.firebase.ui.auth.ErrorCodes;
+import com.firebase.ui.auth.IdpResponse;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
@@ -34,6 +40,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 
 import spartons.com.imagecropper.enums.ImagePickerEnum;
 import spartons.com.imagecropper.listeners.IImagePickerLister;
@@ -48,23 +56,33 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
     public static final int ONLY_CAMERA_REQUEST_CODE = 612;
     public static final int ONLY_STORAGE_REQUEST_CODE = 613;
 
+
+    private static final int RC_SIGN_IN = 123;
+
+
     private String currentPhotoPath = "";
     private UiHelper uiHelper = new UiHelper();
     private ImageView imageView;
 
     Toolbar mToolbar;
+    FirebaseAuth mFirebaseAuth;
+    FirebaseUser mFirebaseUser;
     Drawer mDrawerResult;
     AccountHeader mHeaderResult;
     ProfileDrawerItem mProfileDrawerItem;
     PrimaryDrawerItem mItemLogin, mItemLogout, mItemVerifiedProfile, mItemHome, mItemSettings, mItemUnverifiedProfile, mCurrentProfile;
+    private static final String PP_URL = "https://iteritory.com/msadrud/install-or-setup-apache-ignite-in-windows-step-by-step-tutorial/";
+    private static final String TOS_URL = "https://iteritory.com/msadrud/install-or-setup-apache-ignite-in-windows-step-by-step-tutorial/";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //material start
+        //material & firebaseAuth start
         setupToolbar();
+        intstantiateUser();
         instantiateMenuItems();
         setupProfileDrawer();
         setupNavigationDrawerWithHeader();
@@ -132,6 +150,31 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
                 openCropActivity(sourceUri, destinationUri);
             } catch (Exception e) {
                 uiHelper.toast(this, "Please select another image");
+            }
+        } else if (requestCode == RC_SIGN_IN) {
+            IdpResponse response = IdpResponse.fromResultIntent(data);
+            // Successfully signed in
+            if (resultCode == RESULT_OK) {
+                Toast.makeText(this, R.string.login_success, Toast.LENGTH_LONG).show();
+                signInUser();
+                return;
+            }else{
+                //User pressed back button
+                if (response == null) {
+                    Toast.makeText(this, R.string.login_failed, Toast.LENGTH_LONG).show();
+                    mDrawerResult.deselect(mItemLogin.getIdentifier());
+                    return;
+                }
+                //No internet connection.
+                if (response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
+                    Toast.makeText(this, R.string.no_connectivity, Toast.LENGTH_LONG).show();
+                    return;
+                }
+                //Unknown error
+                if (response.getError().getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
+                    Toast.makeText(this, R.string.login_unknown_Error, Toast.LENGTH_LONG).show();
+                    return;
+                }
             }
         }
     }
@@ -221,7 +264,6 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
 
 
     //material design 시작
-
     // ToolBar 가져와서 현재 app에 부착
     private void setupToolbar(){
         mToolbar = findViewById(R.id.toolbarMain);
@@ -241,10 +283,20 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
         mItemSettings = new PrimaryDrawerItem().withIdentifier(6).withName(R.string.settings).withIcon(getResources().getDrawable(R.mipmap.ic_settings_black_48dp));
     }
 
-    // 디폴트 프로필 디자인 가져오기
+    // 로그인 x시 디폴트 프로필 디자인 가져오기, 로그인시 profile image가져오기
     private void setupProfileDrawer() {
-        mProfileDrawerItem = new ProfileDrawerItem()
-                .withIcon(getResources().getDrawable(R.mipmap.ic_account_circle_black_48dp));
+        //check if the user is logged in. If logged in, get details (name, email, pic etc) dynamically
+        //For demonstration purpose, I have set a personal photo hard coded. In real-time, we can easily
+        // pass the actual photo dynamically.
+        if (mFirebaseUser != null) {
+            mProfileDrawerItem = new ProfileDrawerItem()
+                    .withName(mFirebaseUser.getDisplayName())
+                    .withEmail(mFirebaseUser.getEmail())
+                    .withIcon(getResources().getDrawable(R.drawable.profile));
+        } else {//else if the user is not logged in, show a default icon
+            mProfileDrawerItem = new ProfileDrawerItem()
+                    .withIcon(getResources().getDrawable(R.mipmap.ic_account_circle_black_48dp));
+        }
     }
 
     // 프로필을 header에 올리는 함수
@@ -265,32 +317,67 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
 
     // 네비게이션에 setupAccountHeader()를 붙여주고 이외의 데이터 넣어주기
     private void setupNavigationDrawerWithHeader(){
-        mDrawerResult = new DrawerBuilder()
-                .withActivity(this)
-                .withAccountHeader(setupAccountHeader())
-                .withToolbar(mToolbar)
-                .addDrawerItems(mItemLogin, new DividerDrawerItem(), mItemHome,mItemSettings)
-                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-                    //아이템 클릭될떄마다, callback 불러주기
-                    @Override
-                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                        onNavDrawerItemSelected((int)drawerItem.getIdentifier());
-                        return true;
-                    }
-                })
-                .build();
-        mDrawerResult.deselect(mItemLogin.getIdentifier());
+        //Depending on user is logged in or not, decide whether to show Log In menu or Log Out menu
+        if (!isUserSignedIn()){
+            mDrawerResult = new DrawerBuilder()
+                    .withActivity(this)
+                    .withAccountHeader(setupAccountHeader())
+                    .withToolbar(mToolbar)
+                    .addDrawerItems(mItemLogin, new DividerDrawerItem(), mItemHome,mItemSettings)
+                    .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                        @Override
+                        public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                            onNavDrawerItemSelected((int)drawerItem.getIdentifier());
+                            return true;
+                        }
+                    })
+                    .build();
+            mDrawerResult.deselect(mItemLogin.getIdentifier());
+        }else{
+            mCurrentProfile = checkCurrentProfileStatus();
+            mDrawerResult = new DrawerBuilder()
+                    .withActivity(this)
+                    .withAccountHeader(setupAccountHeader())
+                    .withToolbar(mToolbar)
+                    .addDrawerItems(mCurrentProfile, mItemLogout, new DividerDrawerItem(), mItemHome,mItemSettings)
+                    .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                        @Override
+                        public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                            onNavDrawerItemSelected((int)drawerItem.getIdentifier());
+                            return true;
+                        }
+                    })
+                    .build();
+        }
+        mDrawerResult.closeDrawer();
     }
 
     // nav 아이템 클릭되면 실행될 함수 정의해주면 되는 교통정리 함수
     private void onNavDrawerItemSelected(int drawerItemIdentifier){
+        // Choose authentication providers
+        List<AuthUI.IdpConfig> providers = Arrays.asList(
+                new AuthUI.IdpConfig.EmailBuilder().build(),
+                new AuthUI.IdpConfig.GoogleBuilder().build());
+
+
         switch (drawerItemIdentifier){
             //Sign In
             case 3:
                 Toast.makeText(this, "Login menu selected", Toast.LENGTH_LONG).show();
+                startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder()
+                        .setAvailableProviders(providers)
+                        .setTheme(R.style.AuthUITheme)
+                        .setLogo(R.mipmap.ic_account_circle_black_48dp)
+                        .setTosUrl(TOS_URL)
+                        .setPrivacyPolicyUrl(PP_URL)
+                        //이거 안해줘도 문제가 안생기네 ㅎㅎ
+//                        .setAllowNewEmailAccounts(true)
+                        .setIsSmartLockEnabled(true)
+                        .build(), RC_SIGN_IN);
                 break;
             //Sign Out
             case 4:
+                signOutUser();
                 Toast.makeText(this, "Logout menu selected", Toast.LENGTH_LONG).show();
                 break;
             //Home
@@ -304,4 +391,66 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
         }
     }
     //material design 관련 method 끝
+    private void refreshMenuHeader(){
+        mDrawerResult.closeDrawer();
+        mHeaderResult.clear();
+        setupProfileDrawer();
+        setupAccountHeader();
+        mDrawerResult.setHeader(mHeaderResult.getView());
+        mDrawerResult.resetDrawerContent();
+    }
+
+    private void signInUser(){
+        intstantiateUser();
+        if (!mFirebaseUser.isEmailVerified()){
+            //mFirebaseUser.sendEmailVerification();
+        }
+        mCurrentProfile = checkCurrentProfileStatus();
+        mDrawerResult.updateItemAtPosition(mCurrentProfile,1);
+        mDrawerResult.addItemAtPosition(mItemLogout,2);
+        mDrawerResult.deselect(mItemLogout.getIdentifier());
+        refreshMenuHeader();
+        ((TextView)findViewById(R.id.content)).setText(R.string.welcome_on_signin);
+    }
+
+    private void signOutUser(){
+        //Sign out
+        mFirebaseAuth.signOut();
+        mFirebaseUser = mFirebaseAuth.getCurrentUser();
+        if (!isUserSignedIn()) {
+
+            mDrawerResult.updateItemAtPosition(mItemLogin,1);
+            mDrawerResult.removeItemByPosition(2);
+
+            mDrawerResult.deselect(mItemLogin.getIdentifier());
+            refreshMenuHeader();
+            ((TextView)findViewById(R.id.content)).setText(R.string.default_nouser_signin);
+        }else{
+            //check if internet connectivity is there
+        }
+    }
+    private void intstantiateUser(){
+        mFirebaseAuth = FirebaseAuth.getInstance();
+        mFirebaseUser = mFirebaseAuth.getCurrentUser();
+    }
+
+    private boolean isUserSignedIn(){
+        if (mFirebaseUser == null){
+            return false;
+        }else{
+            return true;
+        }
+    }
+    private PrimaryDrawerItem checkCurrentProfileStatus(){
+        if (mFirebaseUser.isEmailVerified()){
+            mCurrentProfile = new PrimaryDrawerItem().withIdentifier(2).withName(R.string.verified_profile).withIcon(getResources().getDrawable(R.mipmap.ic_verified_user_black_24dp));;
+        }else{
+            mCurrentProfile = new PrimaryDrawerItem().withIdentifier(2).withName(R.string.unverified_profile).withIcon(getResources().getDrawable(R.mipmap.ic_report_problem_black_24dp));
+        }
+        return mCurrentProfile;
+    }
+
+
+
+    // firebase User auth method 끝
 }
