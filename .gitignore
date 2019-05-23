@@ -11,4 +11,6 @@
 /build
 /captures
 .externalNativeBuild
-/mainProject/app/google-services.json
+/app/google-services.json
+/ItcMyFirebaseAuth/app/google-services.json
+

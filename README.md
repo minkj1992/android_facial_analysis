@@ -65,4 +65,16 @@
 ## 진행 사항
 
 ### Cropper`
-`uCrop`를 사용하여 size 조절 부터 rotation 까지 모두 마무리 한다.
+- `uCrop`를 사용하여 size 조절 부터 rotation 까지 모두 마무리 한다.
+- `./cropMaterial`: `FirebaseUI`+ `Material` + `uCrop`
+    - 호환 문제 해결
+        - `android {compileSdkVersion 26}`
+        - `implementation 'com.android.support:appcompat-v7:26.1.0'`
+        - 
+        ```java
+            implementation("com.mikepenz:materialdrawer:6.0.7@aar") {
+            transitive = true
+        }
+        ```
+    - `login`기능 추가
+    - `Material` 사용하여 sideBar(Navigation added)
