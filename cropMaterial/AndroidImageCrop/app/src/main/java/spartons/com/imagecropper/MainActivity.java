@@ -257,8 +257,8 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
         options.setCircleDimmedLayer(true);
         options.setCropFrameColor(ContextCompat.getColor(this, R.color.colorAccent));
         UCrop.of(sourceUri, destinationUri)
-                .withMaxResultSize(100, 100)
-                .withAspectRatio(5f, 5f)
+//                .withMaxResultSize(100, 100)
+//                .withAspectRatio(5f, 5f)
                 .start(this);
     }
 
