@@ -36,6 +36,7 @@ public class Classifier {
 
     public Classifier(Activity activity) throws IOException {
         mInterpreter = new Interpreter(loadModelFile(activity), options);
+        // num_images = 4
         mImageData = ByteBuffer.allocateDirect(
                 4 * BATCH_SIZE * IMG_HEIGHT * IMG_WIDTH * NUM_CHANNEL);
         mImageData.order(ByteOrder.nativeOrder());
@@ -65,6 +66,7 @@ public class Classifier {
         if (mImageData == null) {
             return;
         }
+        //rewind() :포지션은 맨 처음으로 초기화합니다. (포지션이 0이 아닐 때 다시 0으로 위치시킵니다.)
         mImageData.rewind();
 
         bitmap.getPixels(mImagePixels, 0, bitmap.getWidth(), 0, 0,
