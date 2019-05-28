@@ -64,7 +64,7 @@
 
 ## 진행 사항
 
-### Cropper`
+### Cropper
 - `uCrop`를 사용하여 size 조절 부터 rotation 까지 모두 마무리 한다.
 - `./cropMaterial`: `FirebaseUI`+ `Material` + `uCrop`
     - 호환 문제 해결
@@ -78,3 +78,5 @@
         ```
     - `login`기능 추가
     - `Material` 사용하여 sideBar(Navigation added)
+
+- keras 모델 생성한것 tflite로 변환 후 android에 적용시키기 

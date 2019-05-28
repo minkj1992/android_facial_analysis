@@ -1,9 +1,11 @@
 package spartons.com.imagecropper;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -38,6 +40,7 @@ import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -201,10 +204,32 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
             InputStream inputStream = new FileInputStream(file);
             Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
             imageView.setImageBitmap(bitmap);
+            //resize
+            Bitmap rzBitmap = getResizedBitmap(bitmap,299,299);
+            Result result = mClassifier.classify(image);
+            renderResult(result);
+
         } catch (Exception e) {
             uiHelper.toast(this, "Please select different profile picture.");
         }
     }
+    public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+        // CREATE A MATRIX FOR THE MANIPULATION
+        Matrix matrix = new Matrix();
+        // RESIZE THE BIT MAP
+        matrix.postScale(scaleWidth, scaleHeight);
+
+        // "RECREATE" THE NEW BITMAP
+        Bitmap resizedBitmap = Bitmap.createBitmap(
+                bm, 0, 0, width, height, matrix, false);
+        bm.recycle();
+        return resizedBitmap;
+    }
+
 
     @Override
     public void onOptionSelected(ImagePickerEnum imagePickerEnum) {
