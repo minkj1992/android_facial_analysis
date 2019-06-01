@@ -81,6 +81,9 @@ public class Classifier {
         }
     }
 
+
+//    private float convertToGreyScale(int color) {
+//        return (((color >> 16) & 0xFF) + ((color >> 8) & 0xFF) + (color & 0xFF)) / 3.0f / 255.0f; }
     private static float convertPixel(int color) {
         return (255 - (((color >> 16) & 0xFF) * 0.299f
                 + ((color >> 8) & 0xFF) * 0.587f
