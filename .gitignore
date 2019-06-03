@@ -11,9 +11,10 @@
 /build
 /captures
 .externalNativeBuild
-/app/google-services.json
-/ItcMyFirebaseAuth/app/google-services.json
-/cropMaterial/androidCropKeras/app/src/main/assets/inception_v3.tflite
-/cropMaterial/androidCropKeras/app/google-services.json
-/Keras/inception_v3_face.h5
 
+app/google-services.json
+ItcMyFirebaseAuth/app/google-services.json
+cropMaterial/androidCropKeras/app/src/main/assets/inception_v3.tflite
+cropMaterial/androidCropKeras/app/google-services.json
+Keras/inception_v3_face.h5
+cropMaterial/androidCropKeras/app
