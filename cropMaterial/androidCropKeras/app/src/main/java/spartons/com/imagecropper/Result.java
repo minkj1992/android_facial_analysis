@@ -1,5 +1,7 @@
 package spartons.com.imagecropper;
 
+import java.util.Map;
+
 public class Result {
 
     private final int mNumber;
