@@ -79,4 +79,13 @@
     - `login`기능 추가
     - `Material` 사용하여 sideBar(Navigation added)
 
-- keras 모델 생성한것 tflite로 변환 후 android에 적용시키기 
+### tflite 
+- keras 모델 생성한것 tflite로 변환 후 android에 적용시키기 완료
+- float 5개 outputs 완료
+
+### 앞으로 할일
+- firebase auth와 fire storage 연동시키기 (1:1 one to one 관계로 db 구축하기)
+- 값 받아와서 material radar형식으로 보여주기
+- 
+
+

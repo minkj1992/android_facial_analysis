@@ -62,7 +62,16 @@ public class Classifier {
         float[] out = new float[5];
 
         for (int i=0; i<5;i++) {
-            out[i] = ((float[][])output_map.get(i))[0][0];
+            float tmp = ((float[][])output_map.get(i))[0][0];
+            boolean flag = true;
+            while (flag) {
+                if (tmp < 0.0999) {
+                    tmp *= 10;
+                } else {
+                    flag = false;
+                }
+            }
+            out[i] = tmp;
         }
 
         Log.v("minkj1992", "classify(): result = " + Arrays.toString(out));
