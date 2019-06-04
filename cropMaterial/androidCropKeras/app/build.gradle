@@ -8,8 +8,15 @@ android {
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+    dexOptions {
+        jumboMode true
+        javaMaxHeapSize "4g"
+    }
+
+
     buildTypes {
         release {
             minifyEnabled false
@@ -61,5 +68,7 @@ dependencies {
     // Google's Maven repository to your root-level build.gradle file
 
     implementation 'com.firebaseui:firebase-ui-auth:4.1.0'
+    implementation 'com.google.firebase:firebase-firestore:19.0.1'
+    implementation 'com.android.support:multidex:1.0.3'
 }
 apply plugin: 'com.google.gms.google-services'

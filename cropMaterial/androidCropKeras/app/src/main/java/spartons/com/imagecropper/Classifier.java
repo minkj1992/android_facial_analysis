@@ -52,7 +52,7 @@ public class Classifier {
 
     }
 
-    public Result classify(Bitmap bitmap) {
+    public float[] classify(Bitmap bitmap) {
         rzimage = bitmap;
 //        convertBitmapToByteBuffer(bitmap);
         convertBitmapTo3channel(rzimage);
@@ -75,7 +75,7 @@ public class Classifier {
         }
 
         Log.v("minkj1992", "classify(): result = " + Arrays.toString(out));
-        return new Result(out);
+        return out;
     }
     private void convertBitmapTo3channel(Bitmap rzimage) {
         for (int x = 0; x < 299; x++) {

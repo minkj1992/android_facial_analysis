@@ -29,3 +29,77 @@
 
 `해결`:
 - `float[] out = null` -> `float[] out = new float[5];`
+
+---------------------------------------------
+
+# firestore with fireAuth error
+
+## 1st error
+> 2019-06-04 14:11:31.674 6556-6556/spartons.com.imagecropper E/AuthUI: A sign-in error occurred.
+    com.firebase.ui.auth.FirebaseUiException: Error when saving credential.
+        at com.firebase.ui.auth.viewmodel.smartlock.SmartLockHandler$1.onComplete(SmartLockHandler.java:98)
+        at com.google.android.gms.tasks.zzj.run(Unknown Source:4)
+        at android.os.Handler.handleCallback(Handler.java:873)
+        at android.os.Handler.dispatchMessage(Handler.java:99)
+        at android.os.Looper.loop(Looper.java:193)
+        at android.app.ActivityThread.main(ActivityThread.java:6669)
+        at java.lang.reflect.Method.invoke(Native Method)
+        at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+        at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+     Caused by: com.google.android.gms.common.api.ApiException: 16: No eligible accounts can be found.
+        at com.google.android.gms.common.internal.ApiExceptionUtil.fromStatus(Unknown Source:4)
+        at com.google.android.gms.common.internal.zai.zaf(Unknown Source:2)
+        at com.google.android.gms.common.internal.zaj.onComplete(Unknown Source:6)
+        at com.google.android.gms.common.api.internal.BasePendingResult.zaa(Unknown Source:172)
+        at com.google.android.gms.common.api.internal.BasePendingResult.setResult(Unknown Source:131)
+        at
+
+- `원인`: 
+    > By default, FirebaseUI uses Smart Lock for Passwords to store the user's credentials and automatically sign users into your app on subsequent attempts.
+- `해결방법`:
+    - 
+    ```java
+    startActivityForResult(
+    AuthUI.getInstance()
+        .createSignInIntentBuilder()
+        .setIsSmartLockEnabled(false)
+        .build(),
+    RC_SIGN_IN);
+    ```
+## 2nd error
+
+> AGPBI: {"kind":"error","text":"Cannot fit requested classes in a single dex file (# methods: 97073 \u003e 65536)","sources":[{}],"tool":"D8"}
+FAILURE: Build failed with an exception.
+
+> * What went wrong:
+Execution failed for task ':app:transformDexArchiveWithExternalLibsDexMergerForDebug'.
+ com.android.builder.dexing.DexArchiveMergerException: Error while merging dex archives: 
+  The number of method references in a .dex file cannot exceed 64K.
+  Learn how to resolve this issue at https://developer.android.com/tools/building/multidex.html
+
+- [참고자료](https://blog.miyam.net/33)
+
+- `원인`:
+    - 메소드 갯수가 64k이상을 넘어갈때 일어나는 현상
+
+- `해결책`:
+1. `build.gradle` 수정
+
+    - 기본적으로 sdk 컴파일 관련 버전은 21 이상으로 변경 (기존에 되어 있다면 패스)
+
+    - defaultConfig 아래에 multiDexEnabled true 추가
+
+    - dependencies 아래에 compile 'com.android.support:multidex:1.0.0' 추가
+
+    - dexOptions 아래에 jumboMode true 와 javaMaxHeapSize "4g" 추가 (이 부분을 넣지 않으면 메모리가 부족하다고 에러 메세지 발생)
+
+2. `AndroidManifest.xml` 파일 수정
+
+      - application 태그 속성으로 android:name="android.support.multidex.MultiDexApplication" 추가
+
+
+
+## 3rd error
+> /home/minkj1992/AndroidStudioProjects/android_facial_analysis/cropMaterial/androidCropKeras/app/src/main/java/spartons/com/imagecropper/MainActivity.java:
+uses or overrides a deprecated API.
+Recompile with -Xlint:deprecation for details.

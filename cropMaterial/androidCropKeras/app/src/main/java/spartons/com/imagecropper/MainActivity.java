@@ -31,6 +31,7 @@ import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
@@ -74,6 +75,8 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
     private Classifier mClassifier;
     private TextView mTvPrediction;
     private TextView mTvProbability;
+    private firestore firestore;
+
 
 
     Toolbar mToolbar;
@@ -133,8 +136,14 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
                 //@tmp
                 Bitmap gray = grayScale(getResizedBitmap(bitmap, 299, 299));
                 imageView.setImageBitmap(gray);
-                Result result = mClassifier.classify(gray);
-                renderResult(result);
+                float[] out = mClassifier.classify(gray);
+//                renderResult(result);
+                if (firestore.searchDB(mFirebaseUser.getUid(), out)) {
+                    //현재 프로필사진 바꿔주고, 등등 ui요소 처리 (alter happened)
+                    //storage에 사진 지워주고 새로운 사진을 넣어준다.
+                } else {
+                    // 신규 회원
+                }
 
                 //@tmp
                 //resize
@@ -180,6 +189,15 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
             Toast.makeText(this, R.string.failed_to_create_classifier, Toast.LENGTH_LONG).show();
             Log.e(LOG_TAG, "init(): Failed to create Classifier", e);
         }
+        try {
+            firestore = new firestore();
+            firestore.setDb();
+        } catch (Exception e) {
+            Toast.makeText(this, R.string.error_firestore_init_db, Toast.LENGTH_LONG).show();
+            Log.e(LOG_TAG, "init(): Failed to create firestore_db", e);
+        }
+
+
     }
     private void renderResult(Result result) {
         //결과값 return
@@ -483,7 +501,7 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
                         .setPrivacyPolicyUrl(PP_URL)
                         //이거 안해줘도 문제가 안생기네 ㅎㅎ
 //                        .setAllowNewEmailAccounts(true)
-                        .setIsSmartLockEnabled(true)
+                        .setIsSmartLockEnabled(false)
                         .build(), RC_SIGN_IN);
                 break;
             //Sign Out

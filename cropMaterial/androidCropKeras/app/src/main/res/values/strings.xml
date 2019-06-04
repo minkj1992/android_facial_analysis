@@ -21,6 +21,7 @@
     <string name="logout_failed">Failed to log out</string>
     <string name="login_unknown_Error">Unknown error while logging in. Please Try again</string>
     <string name="no_connectivity">There is no internet connection. Please try again</string>
+    <string name="error_firestore_init_db">There is no firestore database</string>
 
     <string-array name="imagePicker">
         <item>From Gallery</item>
