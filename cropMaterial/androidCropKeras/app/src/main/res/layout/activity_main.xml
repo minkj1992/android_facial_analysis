@@ -12,7 +12,13 @@
         android:background="@color/primary"
         android:id="@+id/toolbarMain"/>
 
-    <!--android:layout_width="300dp" android:layout_height="300dp"-->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:id="@+id/fragment_container"
+        android:layout_below="@+id/toolbarMain"/>
+
     <spartons.com.imagecropper.customViews.MyCircleImageView
         android:id="@+id/imageView"
         android:layout_width="299dp"
@@ -41,48 +47,4 @@
         android:layout_marginTop="?attr/actionBarSize"
         android:text="@string/analyze" />
 
-    <TableLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <TableRow>
-
-            <TextView
-                style="@style/ResultText"
-                android:text="@string/probability"/>
-
-            <TextView
-                style="@style/ResultText"
-                android:text="@string/prediction"/>
-        </TableRow>
-
-        <TableRow>
-
-            <TextView
-                android:id="@+id/tv_probability"
-                style="@style/ResultText"
-                android:textColor="@android:color/black"
-                android:text="@string/empty"
-                tools:text="0.9"/>
-
-
-            <TextView
-                android:id="@+id/tv_prediction"
-                style="@style/ResultText"
-                android:textColor="@android:color/black"
-                android:text="@string/empty"
-                tools:text="1"/>
-
-        </TableRow>
-    </TableLayout>
-    <!--@tmp-->
-    <ImageView
-        android:id="@+id/gray"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="5dp"
-        android:layout_margin="10dp"
-        android:layout_below="@+id/analyzeButton"
-        android:layout_centerInParent="true"
-        />
-    <!--@tmp-->
 </RelativeLayout>

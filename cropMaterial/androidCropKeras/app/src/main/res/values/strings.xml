@@ -12,6 +12,8 @@
     <string name="home">Home</string>
     <string name="unverified_profile">My Profile (Unverified)</string>
     <string name="settings">Settings</string>
+    <string name="classify">Classify</string>
+    <string name="gallery">Gallery</string>
     <string name="logout_menu_item">Sign out</string>
     <string name="welcome_on_signin">Congratulations! you have successfully signed in.</string>
     <string name="default_nouser_signin">No user signed in currently.</string>

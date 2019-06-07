@@ -2,9 +2,16 @@ package spartons.com.imagecropper;
 
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.widget.Toast;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
@@ -13,19 +20,24 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+
 import org.tensorflow.lite.Interpreter;
 
 
-public class Classifier {
+public class Classifier extends AppCompatActivity {
     private static final String LOG_TAG = "minkj1992";
     private static final String MODEL_NAME = "inception_v3.tflite";
+    private firestore firestore;
 
 
     private static final int BATCH_SIZE = 1;
     public static final int IMG_HEIGHT = 299;
     public static final int IMG_WIDTH = 299;
     private static final int NUM_CHANNEL = 3;
-
 
     private final Interpreter.Options options = new Interpreter.Options();
     private Interpreter mInterpreter;
@@ -39,22 +51,50 @@ public class Classifier {
     private final float[][] professor = new float[1][1];
     private final float[][] athlete = new float[1][1];
 
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+//        setContentView(R.layout.activity_classifier);
 
-
-    public Classifier(Activity activity) throws IOException {
-        mInterpreter = new Interpreter(loadModelFile(activity), options);
-
+        Intent intent = getIntent(); /*데이터 수신*/
+        init();
         output_map.put(0, athlete);
         output_map.put(1, celebrity);
         output_map.put(2, ceo);
         output_map.put(3, crime);
         output_map.put(4, professor);
+        float[] result =  classify(intent.getParcelableExtra("gray"));
+        // 3. 연산한 결과 값을 resultIntent 에 담아서 MainActivity 로 전달하고 현재 Activity 는 종료.
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra("result",result);
+        setResult(RESULT_OK,resultIntent);
+        if (mInterpreter !=null) {
+            mInterpreter.close();
+            mInterpreter = null;
+        }
 
+        finish();
+//        FirebaseUser mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+    }
+
+    private void init() {
+        try {
+            mInterpreter = new Interpreter(loadModelFile(this), options);
+        } catch (IOException e) {
+            Toast.makeText(this, R.string.failed_to_create_classifier, Toast.LENGTH_LONG).show();
+            Log.e(LOG_TAG, "init(): Failed to create Classifier", e);
+        }
+//        try {
+//            firestore = new firestore();
+//            firestore.setDb();
+//        } catch (Exception e) {
+//            Toast.makeText(this, R.string.error_firestore_init_db, Toast.LENGTH_LONG).show();
+//            Log.e(LOG_TAG, "init(): Failed to create firestore_db", e);
+//        }
     }
 
     public float[] classify(Bitmap bitmap) {
         rzimage = bitmap;
-//        convertBitmapToByteBuffer(bitmap);
         convertBitmapTo3channel(rzimage);
 
         Object[] inputs = new Object[]{input};
@@ -73,7 +113,6 @@ public class Classifier {
             }
             out[i] = tmp;
         }
-
         Log.v("minkj1992", "classify(): result = " + Arrays.toString(out));
         return out;
     }
@@ -106,8 +145,36 @@ public class Classifier {
     }
 
     /** Closes tflite to release resources. */
+
+    // https://stackoverflow.com/questions/4423671/why-does-super-ondestroy-in-java-android-goes-on-top-in-destructors
+    // super.onDestroy()를 제일 마지막에.
+    @Override
+    public void onDestroy() {
+        close();
+        super.onDestroy();
+    }
+
     public void close() {
-        mInterpreter.close();
-        mInterpreter = null;
+        if (mInterpreter !=null) {
+            mInterpreter.close();
+            mInterpreter = null;
+        }
     }
 }
+
+
+//
+//    float[] out = mClassifier.classify(gray);
+////                renderResult(result);
+//        if (firestore.searchDB(mFirebaseUser.getUid(), out)) {
+//                //현재 프로필사진 바꿔주고, 등등 ui요소 처리 (alter happened)
+//                //storage에 사진 지워주고 새로운 사진을 넣어준다.
+//                } else {
+//                // 신규 회원
+//                }
+//
+////@tmp
+////resize
+////                Bitmap rzBitmap = getResizedBitmap(bitmap,299,299);
+////                Result result = mClassifier.classify(rzBitmap);
+////                renderResult(result);

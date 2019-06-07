@@ -11,18 +11,27 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class firestore {
     private FirebaseFirestore db;
+    private FirebaseStorage storage;
+    private StorageReference storageRef;
     private Map<String, Object> user = null;
 
     public void setDb() {
         db = FirebaseFirestore.getInstance();
+        storage = FirebaseStorage.getInstance("gs://fir-ui-4330a.appspot.com/");
+        storageRef = storage.getReference();
     }
-
+    
+    public FirebaseStorage getStorage() {
+        return storage;
+    }
     public FirebaseFirestore getDb() {
         return db;
     }

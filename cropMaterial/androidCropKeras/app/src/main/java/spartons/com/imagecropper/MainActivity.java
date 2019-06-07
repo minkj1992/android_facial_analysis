@@ -15,6 +15,9 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
@@ -31,7 +34,7 @@ import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
+
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
@@ -41,11 +44,11 @@ import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
+import com.razerdp.widget.animatedpieview.AnimatedPieView;
 import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -64,20 +67,15 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
     public static final int CAMERA_STORAGE_REQUEST_CODE = 611;
     public static final int ONLY_CAMERA_REQUEST_CODE = 612;
     public static final int ONLY_STORAGE_REQUEST_CODE = 613;
-
-
     private static final int RC_SIGN_IN = 123;
+    private static final int CLASSIFY_REQUEST_CODE = 724;
 
 
     private String currentPhotoPath = "";
     private UiHelper uiHelper = new UiHelper();
     private ImageView imageView;
-    private Classifier mClassifier;
     private TextView mTvPrediction;
     private TextView mTvProbability;
-    private firestore firestore;
-
-
 
     Toolbar mToolbar;
     FirebaseAuth mFirebaseAuth;
@@ -85,14 +83,14 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
     Drawer mDrawerResult;
     AccountHeader mHeaderResult;
     ProfileDrawerItem mProfileDrawerItem;
-    PrimaryDrawerItem mItemLogin, mItemLogout, mItemVerifiedProfile, mItemHome, mItemSettings, mItemUnverifiedProfile, mCurrentProfile;
-    //tmp
-
-    //@tmp
+    PrimaryDrawerItem mItemLogin, mItemLogout, mItemVerifiedProfile, mItemHome, mItemSettings, mItemUnverifiedProfile, mCurrentProfile, mClassifier,mGallery;
+    DividerDrawerItem line = new DividerDrawerItem();
+    DividerDrawerItem line2 = new DividerDrawerItem();
     private Bitmap bitmap = null;
     private static final String PP_URL = "https://iteritory.com/msadrud/install-or-setup-apache-ignite-in-windows-step-by-step-tutorial/";
     private static final String TOS_URL = "https://iteritory.com/msadrud/install-or-setup-apache-ignite-in-windows-step-by-step-tutorial/";
 
+    private float[] result;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,128 +99,35 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
 
         //material & firebaseAuth start
         setupToolbar();
+        //유저 setting하기
         intstantiateUser();
+        //메뉴 생성하기
         instantiateMenuItems();
         setupProfileDrawer();
         setupNavigationDrawerWithHeader();
-        //material end
-
+        //로그인 하지 않았으면 로그인하도록 유도
+        if (!isUserSignedIn()) {
+            onNavDrawerItemSelected(3);
+        }
         //UCROP start
         findViewById(R.id.selectPictureButton).setOnClickListener(v -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
                 if (uiHelper.checkSelfPermissions(this))
                     uiHelper.showImagePickerDialog(this, this);
         });
-        mTvPrediction =  findViewById(R.id.tv_probability);
-        mTvProbability =  findViewById(R.id.tv_prediction);
 
-        imageView = findViewById(R.id.imageView);
-//        imageView.setScaleType(ImageView.ScaleType.FIT_XY);    // [299, 299]에 꽉 차게 표시
-        //tmp
+        //@TODO HERE START
+        //ClassifyIntent() nav바에서는 작동 안하고 Result page 보여지는거로 하기
+//        imageView = findViewById(R.id.imageView);
 
-        //@tmp
-
-        init();
         findViewById(R.id.analyzeButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mClassifier == null) {
-                    Log.e(LOG_TAG, "onDetectClick(): Classifier is not initialized");
-                    return;
-                } else if (bitmap == null) {
-                    Toast.makeText(getApplicationContext(), R.string.login_success, Toast.LENGTH_LONG).show();
-                    return;
-                }
-                //@tmp
-                Bitmap gray = grayScale(getResizedBitmap(bitmap, 299, 299));
-                imageView.setImageBitmap(gray);
-                float[] out = mClassifier.classify(gray);
-//                renderResult(result);
-                if (firestore.searchDB(mFirebaseUser.getUid(), out)) {
-                    //현재 프로필사진 바꿔주고, 등등 ui요소 처리 (alter happened)
-                    //storage에 사진 지워주고 새로운 사진을 넣어준다.
-                } else {
-                    // 신규 회원
-                }
-
-                //@tmp
-                //resize
-//                Bitmap rzBitmap = getResizedBitmap(bitmap,299,299);
-//                Result result = mClassifier.classify(rzBitmap);
-//                renderResult(result);
+                classifyIntent();
             }
         });
 
     }
-    //@tmp
-    //grayscale화 시키기
-    private Bitmap grayScale(final Bitmap orgBitmap){
-
-        int width, height;
-        width = orgBitmap.getWidth();
-        height = orgBitmap.getHeight();
-        Log.d("minkj1992", "original: "+String.valueOf(width)+String.valueOf(height));
-
-        Bitmap bmpGrayScale = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bmpGrayScale);
-        Paint paint = new Paint();
-        ColorMatrix colorMatrix = new ColorMatrix();
-        colorMatrix.setSaturation(0);
-        ColorMatrixColorFilter colorMatrixFilter = new ColorMatrixColorFilter(colorMatrix);
-        paint.setColorFilter(colorMatrixFilter);
-        canvas.drawBitmap(orgBitmap , 0 , 0 , paint);
-
-        width = bmpGrayScale.getWidth();
-        height = bmpGrayScale.getHeight();
-        Log.d("minkj1992", "grayscale: "+String.valueOf(width)+String.valueOf(height));
-        return bmpGrayScale;
-
-    }
-    //@tmp
-
-    //UCROP end
-
-    private void init() {
-        try {
-            mClassifier = new Classifier(this);
-        } catch (IOException e) {
-            Toast.makeText(this, R.string.failed_to_create_classifier, Toast.LENGTH_LONG).show();
-            Log.e(LOG_TAG, "init(): Failed to create Classifier", e);
-        }
-        try {
-            firestore = new firestore();
-            firestore.setDb();
-        } catch (Exception e) {
-            Toast.makeText(this, R.string.error_firestore_init_db, Toast.LENGTH_LONG).show();
-            Log.e(LOG_TAG, "init(): Failed to create firestore_db", e);
-        }
-
-
-    }
-    private void renderResult(Result result) {
-        //결과값 return
-        mTvPrediction.setText(String.valueOf(result.getNumber()));
-        //확률 return
-        mTvProbability.setText(String.valueOf(result.getProbability()));
-    }
-
-    public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
-        int width = bm.getWidth();
-        int height = bm.getHeight();
-        float scaleWidth = ((float) newWidth) / width;
-        float scaleHeight = ((float) newHeight) / height;
-        // CREATE A MATRIX FOR THE MANIPULATION
-        Matrix matrix = new Matrix();
-        // RESIZE THE BIT MAP
-        matrix.postScale(scaleWidth, scaleHeight);
-
-        // "RECREATE" THE NEW BITMAP
-        Bitmap resizedBitmap = Bitmap.createBitmap(
-                bm, 0, 0, width, height, matrix, false);
-        bm.recycle();
-        return resizedBitmap;
-    }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -255,7 +160,6 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
             }
         }
     }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -302,9 +206,25 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
                     return;
                 }
             }
+        } else if (requestCode == CLASSIFY_REQUEST_CODE && resultCode == RESULT_OK) {
+            if (data != null) {
+                // Float 5개 값 받는다.
+                result = data.getFloatArrayExtra("result");
+
+                //Firebase save button render
+                //Reset button
+                //우선 fragment 생성하고
+                //fragment에서 login ,upload, Result, Gallery
+                //생성된 Result fragment에서 값을 보여주고, 저장 버튼 보여준다.
+                // result,
+                //TODO 여기서 부터 만지면 됩니당.
+
+            }
         }
     }
 
+
+//#######################################  Ucrop & Camera  #########################################
     private void openImagesDocument() {
         Intent pictureIntent = new Intent(Intent.ACTION_GET_CONTENT);
         pictureIntent.setType("image/*");
@@ -328,13 +248,10 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
             bitmap = BitmapFactory.decodeStream(inputStream);
             imageView.setImageBitmap(bitmap);
             inputStream.close();
-
-
         } catch (Exception e) {
             uiHelper.toast(this, "Please select different profile picture.");
         }
     }
-
 
     @Override
     public void onOptionSelected(ImagePickerEnum imagePickerEnum) {
@@ -392,6 +309,8 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
                 .start(this);
     }
 
+
+//#######################################  mike penz material  #########################################
     //material design 시작
     // ToolBar 가져와서 현재 app에 부착
     private void setupToolbar(){
@@ -410,6 +329,8 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
 
         mItemHome = new PrimaryDrawerItem().withIdentifier(5).withName(R.string.home).withIcon(getResources().getDrawable(R.mipmap.ic_home_black_48dp));
         mItemSettings = new PrimaryDrawerItem().withIdentifier(6).withName(R.string.settings).withIcon(getResources().getDrawable(R.mipmap.ic_settings_black_48dp));
+        mClassifier = new PrimaryDrawerItem().withIdentifier(7).withName(R.string.classify).withIcon(getResources().getDrawable(R.mipmap.ic_classify));
+        mGallery = new PrimaryDrawerItem().withIdentifier(8).withName(R.string.gallery).withIcon(getResources().getDrawable(R.mipmap.ic_gallery));
     }
 
     // 로그인 x시 디폴트 프로필 디자인 가져오기, 로그인시 profile image가져오기
@@ -422,6 +343,7 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
                     .withName(mFirebaseUser.getDisplayName())
                     .withEmail(mFirebaseUser.getEmail())
                     .withIcon(getResources().getDrawable(R.drawable.profile));
+//                    .withIcon(firestore mFirebaseUser.getUid());
         } else {//else if the user is not logged in, show a default icon
             mProfileDrawerItem = new ProfileDrawerItem()
                     .withIcon(getResources().getDrawable(R.mipmap.ic_account_circle_black_48dp));
@@ -452,7 +374,12 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
                     .withActivity(this)
                     .withAccountHeader(setupAccountHeader())
                     .withToolbar(mToolbar)
-                    .addDrawerItems(mItemLogin, new DividerDrawerItem(), mItemHome,mItemSettings)
+                    .addDrawerItems(
+                            mItemLogin,
+                            line,
+                            mItemHome,
+                            mItemSettings
+                    )
                     .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                         @Override
                         public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
@@ -462,17 +389,53 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
                     })
                     .build();
             mDrawerResult.deselect(mItemLogin.getIdentifier());
-        }else{
+        } else if (isPicExist()) {
             mCurrentProfile = checkCurrentProfileStatus();
             mDrawerResult = new DrawerBuilder()
                     .withActivity(this)
                     .withAccountHeader(setupAccountHeader())
                     .withToolbar(mToolbar)
-                    .addDrawerItems(mCurrentProfile, mItemLogout, new DividerDrawerItem(), mItemHome,mItemSettings)
+                    .withShowDrawerOnFirstLaunch(true)
+                    //@제민욱
+                    //drawer가 사이드 메뉴판이라고 생각하면 되고, 여기에 PrimaryDrawerItem()인스턴스를 넣어주어야한다.
+                    .addDrawerItems(
+                            mCurrentProfile,
+                            mItemLogout,
+                            line,
+                            mItemHome,
+                            mItemSettings,
+                            line2,
+                            //analyzer 보여주기 not classification
+                            mClassifier,
+                            mGallery
+                    )
                     .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                         @Override
                         public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                            onNavDrawerItemSelected((int)drawerItem.getIdentifier());
+                            onNavDrawerItemSelected((int) drawerItem.getIdentifier());
+                            return true;
+                        }
+                    })
+                    .build();
+        } else {
+            mCurrentProfile = checkCurrentProfileStatus();
+            mDrawerResult = new DrawerBuilder()
+                    .withActivity(this)
+                    .withAccountHeader(setupAccountHeader())
+                    .withToolbar(mToolbar)
+                    .withShowDrawerOnFirstLaunch(true)
+                    //drawer가 사이드 메뉴판이라고 생각하면 되고, 여기에 PrimaryDrawerItem()인스턴스를 넣어주어야한다.
+                    .addDrawerItems(
+                            mCurrentProfile,
+                            mItemLogout,
+                            line,
+                            mItemHome,
+                            mItemSettings
+                    )
+                    .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                        @Override
+                        public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                            onNavDrawerItemSelected((int) drawerItem.getIdentifier());
                             return true;
                         }
                     })
@@ -487,11 +450,11 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
         List<AuthUI.IdpConfig> providers = Arrays.asList(
                 new AuthUI.IdpConfig.EmailBuilder().build(),
                 new AuthUI.IdpConfig.GoogleBuilder().build());
-
-
+        //@제민욱
         switch (drawerItemIdentifier){
             //Sign In
             case 3:
+                switchFragment(drawerItemIdentifier);
                 Toast.makeText(this, "Login menu selected", Toast.LENGTH_LONG).show();
                 startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder()
                         .setAvailableProviders(providers)
@@ -507,6 +470,7 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
             //Sign Out
             case 4:
                 signOutUser();
+                switchFragment(drawerItemIdentifier);
                 Toast.makeText(this, "Logout menu selected", Toast.LENGTH_LONG).show();
                 break;
             //Home
@@ -517,8 +481,25 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
             case 6:
                 Toast.makeText(this, "Settings menu selected", Toast.LENGTH_LONG).show();
                 break;
+            //classifier intent
+            case 7:
+                switchFragment(drawerItemIdentifier);
+                break;
+            // gallery
+            case 8:
+                switchFragment(drawerItemIdentifier);
+                galleryIntent();
+                break;
+//                intent = new Intent(this, Classifier.class);
+//                MainActivity.this.startActivity(intent);
+//                break;
         }
+        // 이렇게 startActivity하면 이 activity는 언제 죽는걸까?
+        // 또한 이렇게 intent하게되면 back눌렀을때 main으로 돌아올까?
+        // 또한 이렇게 하면 nav바가 그대로 유지될까?
+
     }
+
     //material design 관련 method 끝
     private void refreshMenuHeader(){
         mDrawerResult.closeDrawer();
@@ -529,17 +510,27 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
         mDrawerResult.resetDrawerContent();
     }
 
-    private void signInUser(){
+    private void signInUser() {
         intstantiateUser();
-        if (!mFirebaseUser.isEmailVerified()){
+        if (!mFirebaseUser.isEmailVerified()) {
             //mFirebaseUser.sendEmailVerification();
         }
         mCurrentProfile = checkCurrentProfileStatus();
-        mDrawerResult.updateItemAtPosition(mCurrentProfile,1);
-        mDrawerResult.addItemAtPosition(mItemLogout,2);
+        mDrawerResult.updateItemAtPosition(mCurrentProfile, 1);
+        mDrawerResult.addItemAtPosition(mItemLogout, 2);
         mDrawerResult.deselect(mItemLogout.getIdentifier());
+        if (isPicExist()) {
+            mDrawerResult.addItem(line2);
+            mDrawerResult.deselect(line2.getIdentifier());
+            mDrawerResult.addItem(mClassifier);
+            mDrawerResult.deselect(mClassifier.getIdentifier());
+            mDrawerResult.addItem(mGallery);
+            mDrawerResult.deselect(mGallery.getIdentifier());
+            //pic,float[][] send to Result
+        }
+
         refreshMenuHeader();
-//        ((TextView)findViewById(R.id.content)).setText(R.string.welcome_on_signin);
+
     }
 
     private void signOutUser(){
@@ -550,14 +541,23 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
 
             mDrawerResult.updateItemAtPosition(mItemLogin,1);
             mDrawerResult.removeItemByPosition(2);
-
             mDrawerResult.deselect(mItemLogin.getIdentifier());
+
+            if (isPicExist()) {
+                mDrawerResult.removeItem(line2.getIdentifier());
+                mDrawerResult.deselect(line2.getIdentifier());
+                mDrawerResult.removeItem(mClassifier.getIdentifier());
+                mDrawerResult.deselect(mClassifier.getIdentifier());
+                mDrawerResult.removeItem(mGallery.getIdentifier());
+                mDrawerResult.deselect(mGallery.getIdentifier());
+            }
             refreshMenuHeader();
-//            ((TextView)findViewById(R.id.content)).setText(R.string.default_nouser_signin);
-        }else{
-            //check if internet connectivity is there
+            // login 페이지 뜨게하기
+            onNavDrawerItemSelected(3);
+
         }
     }
+
     private void intstantiateUser(){
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mFirebaseAuth.getCurrentUser();
@@ -570,6 +570,7 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
             return true;
         }
     }
+
     private PrimaryDrawerItem checkCurrentProfileStatus(){
         if (mFirebaseUser.isEmailVerified()){
             mCurrentProfile = new PrimaryDrawerItem().withIdentifier(2).withName(R.string.verified_profile).withIcon(getResources().getDrawable(R.mipmap.ic_verified_user_black_24dp));;
@@ -580,9 +581,133 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
     }
     // firebase User auth method 끝
 
-    @Override
-    public void onDestroy() {
-        mClassifier.close();
-        super.onDestroy();
+
+
+    public void switchFragment(int key) {
+        Fragment fr = null;
+
+        switch (key) {
+            case 3:
+                break;
+            case 4:
+                break;
+            case 7:
+                fr = new Result(result);
+                break;
+            case 8:
+                break;
+        }
+        
+
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fm.beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_container, fr);
+        fragmentTransaction.commit();
     }
+//#######################################  classifyIntent  #########################################
+
+    //grayscale화 시키기
+    private Bitmap grayScale(final Bitmap orgBitmap){
+
+        int width, height;
+        width = orgBitmap.getWidth();
+        height = orgBitmap.getHeight();
+        Log.d("minkj1992", "original: "+String.valueOf(width)+String.valueOf(height));
+
+        Bitmap bmpGrayScale = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bmpGrayScale);
+        Paint paint = new Paint();
+        ColorMatrix colorMatrix = new ColorMatrix();
+        colorMatrix.setSaturation(0);
+        ColorMatrixColorFilter colorMatrixFilter = new ColorMatrixColorFilter(colorMatrix);
+        paint.setColorFilter(colorMatrixFilter);
+        canvas.drawBitmap(orgBitmap , 0 , 0 , paint);
+
+        width = bmpGrayScale.getWidth();
+        height = bmpGrayScale.getHeight();
+        Log.d("minkj1992", "grayscale: "+String.valueOf(width)+String.valueOf(height));
+        return bmpGrayScale;
+
+    }
+
+    //Resize Bitmap
+    public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+        // CREATE A MATRIX FOR THE MANIPULATION
+        Matrix matrix = new Matrix();
+        // RESIZE THE BIT MAP
+        matrix.postScale(scaleWidth, scaleHeight);
+
+        // "RECREATE" THE NEW BITMAP
+        Bitmap resizedBitmap = Bitmap.createBitmap(
+                bm, 0, 0, width, height, matrix, false);
+        bm.recycle();
+        return resizedBitmap;
+    }
+
+    // 이미지 save했으며 && 이미 nav 바에 classifier와 gallery가 없을경우  -> 즉 처음 사용자일 경우에만 작동하는 함수
+    private void addPicImageNav(){
+        if (isPicExist() && mDrawerResult.getPosition(mClassifier)==-1 && mDrawerResult.getPosition(mGallery)==-1) {
+            mDrawerResult.addItem(line2);
+            mDrawerResult.deselect(line2.getIdentifier());
+            mDrawerResult.addItem(mClassifier);
+            mDrawerResult.deselect(mClassifier.getIdentifier());
+            mDrawerResult.addItem(mGallery);
+            mDrawerResult.deselect(mGallery.getIdentifier());
+            refreshMenuHeader();
+        }
+    }
+
+    private boolean isPicExist() {
+        return false;
+    }
+
+
+    private void classifyIntent() {
+        if (bitmap == null) {
+            Toast.makeText(getApplicationContext(), "Bitmap is null from MainActivity", Toast.LENGTH_LONG).show();
+            return;
+        }
+        Intent intent = null;
+        //@tmp
+        Bitmap gray = grayScale(getResizedBitmap(bitmap, 299, 299));
+        imageView.setImageBitmap(gray);
+
+        intent = new Intent(this, Classifier.class);
+        intent.putExtra("gray", gray);
+        startActivityForResult(intent, CLASSIFY_REQUEST_CODE);
+    }
+
+    private void galleryIntent() {
+
+    }
+
+//    @Override
+//    protected void onSaveInstanceState(Bundle outState) {
+//        //add the values which need to be saved from the drawer to the bundle
+//        outState = mDrawerResult.saveInstanceState(outState);
+//        super.onSaveInstanceState(outState);
+//    }
+//
+//    @Override
+//    public void onBackPressed() {
+//        //handle the back press :D close the drawer first and if the drawer is closed close the activity
+//        if (mDrawerResult != null && mDrawerResult.isDrawerOpen()) {
+//            mDrawerResult.closeDrawer();
+//        } else {
+//            super.onBackPressed();
+//        }
+//
+//    }
+
+//        @Override
+//    protected void onResume() {
+//        super.onResume();
+//        if (mFirebaseUser == null) {
+//            mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+//        }
+//    }
 }

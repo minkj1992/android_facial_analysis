@@ -1,34 +1,56 @@
 package spartons.com.imagecropper;
 
-import java.util.Map;
+import android.annotation.SuppressLint;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
 
-public class Result {
+import com.razerdp.widget.animatedpieview.AnimatedPieView;
+import com.razerdp.widget.animatedpieview.AnimatedPieViewConfig;
+import com.razerdp.widget.animatedpieview.data.IPieInfo;
+import com.razerdp.widget.animatedpieview.data.PieOption;
+import com.razerdp.widget.animatedpieview.data.SimplePieInfo;
 
-    private final int mNumber;
-    private final float mProbability;
+@SuppressLint("ValidFragment")
+public class Result extends Fragment{
+    private float[] mProbability;
+    AnimatedPieView mAnimatedPieView;
 
-    public Result(float[] result) {
-        mNumber = argmax(result);
-        mProbability = result[mNumber];
+    public Result(float[] out) {
+        mProbability = out;
+    }
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.result_fragment, container, false);
+        mAnimatedPieView = view.findViewById(R.id.animatedPieChart);
+        drawPie();
+        return view;
     }
 
-    public int getNumber() {
-        return mNumber;
+    public void drawPie() {
+
+        AnimatedPieViewConfig config = new AnimatedPieViewConfig();
+        config.startAngle(-90)// Starting angle offset
+                .addData(new SimplePieInfo(mProbability[0], Color.parseColor("#77dd77"), "athlete"))//Data (bean that implements the IPieInfo interface)
+                .addData(new SimplePieInfo(mProbability[1], Color.parseColor("#ff6961"), "celebrity"))
+                .addData(new SimplePieInfo(mProbability[2], Color.parseColor("#77dd77"), "ceo"))//Data (bean that implements the IPieInfo interface)
+                .addData(new SimplePieInfo(mProbability[3], Color.parseColor("#ff6961"), "crime"))//Data (bean that implements the IPieInfo interface)
+                .addData(new SimplePieInfo(mProbability[4], Color.parseColor("#77dd77"), "professor"))//Data (bean that implements the IPieInfo interface)
+                .duration(3000);// draw pie animation duration
+        config.floatShadowRadius(18f);
+        config.floatUpDuration(500);
+        config.interpolator(new DecelerateInterpolator(4f));
+
+        // The following two sentences can be replace directly 'mAnimatedPieView.start (config); '
+        mAnimatedPieView.applyConfig(config);
+        mAnimatedPieView.start();
     }
 
-    public float getProbability() {
-        return mProbability;
-    }
-
-    private static int argmax(float[] probs) {
-        int maxIdx = -1;
-        float maxProb = 0.0f;
-        for (int i = 0; i < probs.length; i++) {
-            if (probs[i] > maxProb) {
-                maxProb = probs[i];
-                maxIdx = i;
-            }
-        }
-        return maxIdx;
-    }
 }
