@@ -12,39 +12,85 @@
         android:background="@color/primary"
         android:id="@+id/toolbarMain"/>
 
+    <RelativeLayout
+        android:id="@+id/relative"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/toolbarMain">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="130dp"
+            android:id="@+id/main_linear">
+
+            <Button
+                android:id="@+id/selectPictureButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/select_picture" />
+
+            <Button
+                android:id="@+id/analyzeButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/analyze" />
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/progress"
+            android:layout_width="299dp"
+            android:layout_height="299dp"
+            android:layout_below="@+id/main_linear"
+            android:layout_marginTop="30dp"
+            android:layout_centerInParent="true"
+            android:visibility="visible" />
+
+        <spartons.com.imagecropper.customViews.MyCircleImageView
+            android:id="@+id/imageView"
+            android:layout_width="299dp"
+            android:layout_height="299dp"
+            android:layout_marginTop="30dp"
+            android:layout_below="@+id/main_linear"
+            android:layout_centerInParent="true"
+            android:src="@drawable/ic_launcher_background"
+            app:civ_border_color="#BDBDBD"
+            app:civ_border_width="0.5dp" />
+
+    </RelativeLayout>
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:id="@+id/fragment_container"
-        android:layout_below="@+id/toolbarMain"/>
+        android:layout_below="@+id/toolbarMain">
 
-    <spartons.com.imagecropper.customViews.MyCircleImageView
-        android:id="@+id/imageView"
-        android:layout_width="299dp"
-        android:layout_height="299dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="100dp"
-        android:src="@drawable/ic_launcher_background"
-        app:civ_border_color="#BDBDBD"
-        app:civ_border_width="0.5dp" />
 
-    <Button
-        android:id="@+id/selectPictureButton"
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/firebaseLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/imageView"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="15dp"
-        android:text="@string/select_picture" />
+        android:orientation="horizontal"
 
-    <Button
-        android:id="@+id/analyzeButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/selectPictureButton"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="?attr/actionBarSize"
-        android:text="@string/analyze" />
+        android:gravity="bottom|center"
+        android:visibility="gone"
+        android:layout_alignParentBottom="true"
+        >
+        <Button
+            android:id="@+id/fbBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Save" />
+        <Button
+            android:id="@+id/resetBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Reset" />
+    </LinearLayout>>
 
 </RelativeLayout>

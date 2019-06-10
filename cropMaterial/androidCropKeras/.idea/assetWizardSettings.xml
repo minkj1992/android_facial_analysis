@@ -133,9 +133,10 @@
                                   </option>
                                   <option name="values">
                                     <map>
+                                      <entry key="assetType" value="IMAGE" />
                                       <entry key="iconShape" value="NONE" />
-                                      <entry key="imageAsset" value="$PROJECT_DIR$/app/src/main/res/drawable/drawable-xxxhdpi/ic_insert_photo.png" />
-                                      <entry key="outputName" value="ic_classify" />
+                                      <entry key="imageAsset" value="$USER_HOME$/다운로드/관상logo.png" />
+                                      <entry key="outputName" value="logo" />
                                     </map>
                                   </option>
                                 </PersistentState>

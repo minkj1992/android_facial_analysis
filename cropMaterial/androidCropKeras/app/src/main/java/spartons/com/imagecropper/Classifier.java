@@ -8,7 +8,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+
 import android.util.Log;
 import android.widget.Toast;
 
@@ -31,9 +31,6 @@ import org.tensorflow.lite.Interpreter;
 public class Classifier extends AppCompatActivity {
     private static final String LOG_TAG = "minkj1992";
     private static final String MODEL_NAME = "inception_v3.tflite";
-    private firestore firestore;
-
-
     private static final int BATCH_SIZE = 1;
     public static final int IMG_HEIGHT = 299;
     public static final int IMG_WIDTH = 299;
@@ -54,7 +51,6 @@ public class Classifier extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        setContentView(R.layout.activity_classifier);
 
         Intent intent = getIntent(); /*데이터 수신*/
         init();
@@ -84,13 +80,7 @@ public class Classifier extends AppCompatActivity {
             Toast.makeText(this, R.string.failed_to_create_classifier, Toast.LENGTH_LONG).show();
             Log.e(LOG_TAG, "init(): Failed to create Classifier", e);
         }
-//        try {
-//            firestore = new firestore();
-//            firestore.setDb();
-//        } catch (Exception e) {
-//            Toast.makeText(this, R.string.error_firestore_init_db, Toast.LENGTH_LONG).show();
-//            Log.e(LOG_TAG, "init(): Failed to create firestore_db", e);
-//        }
+
     }
 
     public float[] classify(Bitmap bitmap) {
@@ -166,12 +156,7 @@ public class Classifier extends AppCompatActivity {
 //
 //    float[] out = mClassifier.classify(gray);
 ////                renderResult(result);
-//        if (firestore.searchDB(mFirebaseUser.getUid(), out)) {
-//                //현재 프로필사진 바꿔주고, 등등 ui요소 처리 (alter happened)
-//                //storage에 사진 지워주고 새로운 사진을 넣어준다.
-//                } else {
-//                // 신규 회원
-//                }
+
 //
 ////@tmp
 ////resize
