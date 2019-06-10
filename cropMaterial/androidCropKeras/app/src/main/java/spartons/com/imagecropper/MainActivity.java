@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
     ProgressBar progressBar;
 
 
-    private boolean isPicExist = false;
+    private boolean isPicExist = true;
 
 
 
@@ -408,12 +408,14 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
                 public void onLoadFailed(@Nullable Drawable errorDrawable) {
                     super.onLoadFailed(errorDrawable);
                     progressBar.setVisibility(View.GONE);
+                    isPicExist = false;
                     Log.v("minkj1992","glide 실패");
                 }
 
                 @Override
                 public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                     Log.v("minkj1992","glide 성공");
+                    isPicExist = true;
                     progressBar.setVisibility(View.GONE);
                     bitmap = resource;
                     gray = grayScale(bitmap);
@@ -609,7 +611,7 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
             // gallery
             case 8:
                 switchFragment(drawerItemIdentifier);
-                galleryIntent();
+//                galleryIntent();
                 break;
 
         }
@@ -661,14 +663,14 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
             mDrawerResult.removeItemByPosition(2);
             mDrawerResult.deselect(mItemLogin.getIdentifier());
 
-            if (isPicExist) {
-                mDrawerResult.removeItem(line2.getIdentifier());
-                mDrawerResult.deselect(line2.getIdentifier());
-                mDrawerResult.removeItem(mClassifier.getIdentifier());
-                mDrawerResult.deselect(mClassifier.getIdentifier());
-                mDrawerResult.removeItem(mGallery.getIdentifier());
-                mDrawerResult.deselect(mGallery.getIdentifier());
-            }
+
+            mDrawerResult.removeItem(line2.getIdentifier());
+            mDrawerResult.deselect(line2.getIdentifier());
+            mDrawerResult.removeItem(mClassifier.getIdentifier());
+            mDrawerResult.deselect(mClassifier.getIdentifier());
+            mDrawerResult.removeItem(mGallery.getIdentifier());
+            mDrawerResult.deselect(mGallery.getIdentifier());
+
             refreshMenuHeader();
             // login 페이지 뜨게하기
             onNavDrawerItemSelected(3);
@@ -703,7 +705,8 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
 
     public void switchFragment(int key) {
         Fragment fr = null;
-
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fm.beginTransaction();
         switch (key) {
             case 3:
                 break;
@@ -719,16 +722,18 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
                 fr = new Result(result, gray);
                 relativeLayout.setVisibility(View.GONE);
                 firebaseLayout.setVisibility(View.VISIBLE);
-
-                FragmentManager fm = getSupportFragmentManager();
-                FragmentTransaction fragmentTransaction = fm.beginTransaction();
-
                 fragmentTransaction.replace(fragment_container.getId(), fr);
                 fragmentTransaction.commit();
                 Log.v("minkj1992", "FragmentManager 불려짐");
                 break;
             case 8:
                 relativeLayout.setVisibility(View.GONE);
+                firebaseLayout.setVisibility(View.GONE);
+
+                //@TODO 여기서 firebase 유저들 storage와 값들 가져오면 된다.
+                fr = new Gallery();
+                fragmentTransaction.replace(fragment_container.getId(), fr);
+                fragmentTransaction.commit();
                 break;
         }
     }
@@ -805,9 +810,10 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
         startActivityForResult(intent, CLASSIFY_REQUEST_CODE);
     }
 
-    private void galleryIntent() {
-
-    }
+//    private void galleryIntent() {
+//        Intent intent = new Intent(this, Gallery.class);
+//        startActivity(intent);
+//    }
 }
 
 

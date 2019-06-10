@@ -1,8 +1,14 @@
-package com.example.myapplication;
+package spartons.com.imagecropper;
 
 import android.content.Context;
-import android.support.v7.app.AppCompatActivity;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -18,25 +24,31 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class Gallery extends Fragment {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        final ListView friends = (ListView) findViewById(R.id.friends);
+//    public Gallery() {
+//
+//    }
+
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        Log.v("minkj1992", "Result onCreateView 불려짐");
+        View view = inflater.inflate(R.layout.activity_gallery, container, false);
+        final ListView friends = view.findViewById(R.id.friends);
 
         FlipSettings settings = new FlipSettings.Builder().defaultPage(1).build();
-        friends.setAdapter(new FriendsAdapter(this, Utils.friends, settings));
+        friends.setAdapter(new FriendsAdapter(getContext(), galleryUtils.friends, settings));
         friends.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Friend f = (Friend) friends.getAdapter().getItem(position);
-
-                Toast.makeText(getApplicationContext(), f.getNickname(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), f.getNickname(), Toast.LENGTH_SHORT).show();
             }
         });
+
+        return view;
     }
+
+
 
     class FriendsAdapter extends BaseFlipAdapter {
 
