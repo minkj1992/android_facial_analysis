@@ -1,6 +1,9 @@
 package spartons.com.imagecropper;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -17,11 +20,13 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -98,6 +103,7 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
     LinearLayout firebaseLayout;
     FrameLayout fragment_container;
 
+
     ProgressBar progressBar;
 
 
@@ -122,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, new IntentFilter("galleryIntent"));
 
         //@TODO HERE START
         //ClassifyIntent() nav바에서는 작동 안하고 Result page 보여지는거로 하기
@@ -132,6 +138,7 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
         fragment_container = findViewById(R.id.fragment_container);
 
         progressBar = findViewById(R.id.progress);
+
 
         //material & firebaseAuth start
         setupToolbar();
@@ -183,10 +190,20 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
 //                모든 데이터 싹다 지워주어야한다. reTry
             }
         });
-
-
-
     }
+
+
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            //힘들다 그냥, 현재 로그인된 얼굴 보여주자.
+//            gray = grayScale(getResizedBitmap((Bitmap)intent.getParcelableExtra("BitmapImage"), 299, 299));
+//            gray = intent.getIntExtra("idx",1);
+//            result = intent.getFloatArrayExtra("result");
+            switchFragment(7);
+        }
+    };
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -712,6 +729,8 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
                 break;
             case 4:
                 relativeLayout.setVisibility(View.GONE);
+
+
                 break;
             case 5:
                 relativeLayout.setVisibility(View.VISIBLE);
@@ -721,6 +740,7 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
                 Log.v("minkj1992", "switchFragment's Result case 불려짐");
                 fr = new Result(result, gray);
                 relativeLayout.setVisibility(View.GONE);
+
                 firebaseLayout.setVisibility(View.VISIBLE);
                 fragmentTransaction.replace(fragment_container.getId(), fr);
                 fragmentTransaction.commit();
@@ -729,6 +749,7 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
             case 8:
                 relativeLayout.setVisibility(View.GONE);
                 firebaseLayout.setVisibility(View.GONE);
+
 
                 //@TODO 여기서 firebase 유저들 storage와 값들 가져오면 된다.
                 fr = new Gallery();

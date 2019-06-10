@@ -92,7 +92,4 @@
             android:layout_height="wrap_content"
             android:text="Reset" />
     </LinearLayout>>
-
-
-
 </RelativeLayout>

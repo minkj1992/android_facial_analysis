@@ -1,22 +1,30 @@
 package spartons.com.imagecropper;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.yalantis.flipviewpager.adapter.BaseFlipAdapter;
 import com.yalantis.flipviewpager.utils.FlipSettings;
 
@@ -25,10 +33,9 @@ import java.util.Iterator;
 import java.util.List;
 
 public class Gallery extends Fragment {
-
-//    public Gallery() {
-//
-//    }
+    FloatingActionButton show;
+    int cnt;
+    float[] result;
 
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Log.v("minkj1992", "Result onCreateView 불려짐");
@@ -42,8 +49,24 @@ public class Gallery extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Friend f = (Friend) friends.getAdapter().getItem(position);
                 Toast.makeText(getContext(), f.getNickname(), Toast.LENGTH_SHORT).show();
+                cnt = position;
+
+                Log.v("minkj1992","gallery item clicked idx: "+ cnt);
             }
         });
+        show = view.findViewById(R.id.show);
+        show.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                Intent intent = new Intent("galleryIntent").setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                intent.putExtra("idx",cnt);
+//                intent.putExtra("BitmapImage", bitmap);
+//                intent.putExtra("result",result);
+//                LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
+                Log.v("minkj1992","gallery item send idx: "+ cnt);
+            }
+        });
+
 
         return view;
     }
@@ -81,8 +104,18 @@ public class Gallery extends Fragment {
             switch (position) {
                 // Merged page with 2 friends
                 case 1:
+                    //
+                    //@COVERTHIS, 이미지 세팅만 해준다. friends에는 url이 담기도록한다.
+//                    Glide.with(getContext())
+//                            .load(Uri.parse(((Friend) friend1).getAvatar()))
+//                            .into(holder.leftAvatar);
                     holder.leftAvatar.setImageResource(((Friend) friend1).getAvatar());
-                    if (friend2 != null)
+                    if (friend2 != null){
+//                        Glide.with(getContext())
+////                        (String) document.get("url"))
+//                                .load(Uri.parse(((Friend) friend2).getAvatar()))
+//                                .into(holder.rightAvatar);
+                    }
                         holder.rightAvatar.setImageResource(((Friend) friend2).getAvatar());
                     break;
                 default:
