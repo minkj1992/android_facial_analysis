@@ -3,24 +3,31 @@
 
 - `프로젝트 주제`: 얼굴 이미지를 5가지값으로 관상분석 딥러닝하여 `근력`,`지력`,`재력`,`카리스마`,`범죄력`을 보여주고, 다른 사람들의 분석결과를 공유할 수 있는 `Android App`(`JAVA`).
 
-![](/asset/1.jpg)
-![](/asset/2.jpg)
-![](/asset/3.jpg)
-![](/asset/4.jpg)
-![](/asset/5.jpg)
-![](/asset/6.jpg)
-![](/asset/7.jpg)
-![](/asset/8.jpg)
-![](/asset/9.jpg)
-![](/asset/10.jpg)
-![](/asset/11.jpg)
 
-- `초기 사용자의 경우`
-<div text-align="center"><img src="/asset/3rd.gif" width="360" height="640" ></div>
+<p align="center"><img src="./asset/1.jpg"></p>
+<p align="center"><img src="./asset/2.jpg"></p>
+<p align="center"><img src="./asset/3.jpg"></p>
+<p align="center"><img src="./asset/4.jpg"></p>
+<p align="center"><img src="./asset/5.jpg"></p>
+<p align="center"><img src="./asset/6.jpg"></p>
+<p align="center"><img src="./asset/7.jpg"></p>
+<p align="center"><img src="./asset/8.jpg"></p>
+<p align="center"><img src="./asset/9.jpg"></p>
+<p align="center"><img src="./asset/10.jpg"></p>
+<p align="center"><img src="./asset/11.jpg"></p>
 
-- `기존 id가 있을 경우(사진 포함)`
-<div text-align="center"><img src="/asset/4th.gif" width="360" height="640" ></div>
 
+
+
+<h5 align="center" >초기 사용자의 경우</h5>
+<p align="center"><img src="./asset/3rd.gif" width="360" height="640" ></p>
+
+<br/>
+<br/>
+<h5 align="center" >기존 id가 있을 경우(사진 포함)</h5>
+<p align="center">
+<img src="./asset/4th.gif" width="360" height="640" >
+</p>
 
 
 ## `Class Explanation`
