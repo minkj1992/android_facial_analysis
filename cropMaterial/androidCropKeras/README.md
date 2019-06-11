@@ -1,5 +1,84 @@
-# `TFlite` with `Android error Handling`
+# `관상 분석 app`
+- `Physiognomy Analyzer App`
 
+- `프로젝트 주제`: 얼굴 이미지를 5가지값으로 관상분석 딥러닝하여 `근력`,`지력`,`재력`,`카리스마`,`범죄력`을 보여주고, 다른 사람들의 분석결과를 공유할 수 있는 `Android App`(`JAVA`).
+
+![](/asset/1.jpg)
+![](/asset/2.jpg)
+![](/asset/3.jpg)
+![](/asset/4.jpg)
+![](/asset/5.jpg)
+![](/asset/6.jpg)
+![](/asset/7.jpg)
+![](/asset/8.jpg)
+![](/asset/9.jpg)
+![](/asset/10.jpg)
+![](/asset/11.jpg)
+
+- `초기 사용자의 경우`
+<div text-align="center"><img src="/asset/3rd.gif" width="360" height="640" ></div>
+
+- `기존 id가 있을 경우(사진 포함)`
+<div text-align="center"><img src="/asset/4th.gif" width="360" height="640" ></div>
+
+
+
+## `Class Explanation`
+시간되면 작성 예정..
+
+
+## `Keywords`
+`inception-v3`,`tflite.interpreter`,`AndroidImageCrop`,`materialDesign` ,`fragment & framelayout` ,`firestore` ,`firebaseAuth`,`firestorage`,`CircularFillableLoaders`, `splashscreen`
+
+
+## `프로젝트 상세설명`
+
+- 이외에도 `com.razerdp.widget.animatedpieview.AnimatedPieView;`를 사용하여 `도넛 차트` 생성
+- `Glide`를 활용한 firestorage 이미지 `bitmap` loader
+    - 이미지 loading 과정에 보여줄 `progressBar` animation
+- [`CircularFillableLoaders`](https://github.com/lopspower/CircularFillableLoaders)를 활용한 `splashscreen`
+    - wave form splashScreen
+- `switchfragment()`를 활용하여 sidebar 클릭에 따라서 ui 및 logic이 변하도록 하였다.
+- `gallery`에서 `FloatingActionButton`을 사용하여 `result`view를 띄워주도록 하기 위해서 `BroadcastManager`를 통해 `intent` 값 전달 받았다.
+
+`/MainActivity.java`
+```java
+LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, new IntentFilter("galleryIntent"));
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        gray = grayScale(getResizedBitmap((Bitmap)intent.getParcelableExtra("BitmapImage"), 299, 299));
+        gray = intent.getIntExtra("idx",1);
+        result = intent.getFloatArrayExtra("result");
+        switchFragment(7);
+    }
+};
+```
+
+- gallery에서 전달하는 intent는 flaotingActionButton을 클릭하기 전까지는 show 해주면 안되기 때문에, intent를 update 시켜줄때마다 CLEAR_TOP시켜주었다.
+
+`/Gallery.java`
+```java
+        show.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Intent intent = new Intent("galleryIntent").setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.putExtra("idx",cnt);
+            intent.putExtra("BitmapImage", bitmap);
+            intent.putExtra("result",result);
+            LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
+            Log.v("minkj1992","gallery item send idx: "+ cnt);
+        }
+    });
+```
+
+
+
+
+--------------------------------------
+# `TFlite with Android error Handling`
+
+> 여기서부터는 프로젝트를 하면서 겪었던 error들을 모아놓은 자료입니다.
 ## 1st Error
 > Unexpected failure when preparing tensor allocations: tensorflow/lite/kernels/conv.cc:224
 
@@ -32,7 +111,7 @@
 
 ---------------------------------------------
 
-# firestore with fireAuth error
+# `firestore with fireAuth error`
 
 ## 1st error
 > 2019-06-04 14:11:31.674 6556-6556/spartons.com.imagecropper E/AuthUI: A sign-in error occurred.

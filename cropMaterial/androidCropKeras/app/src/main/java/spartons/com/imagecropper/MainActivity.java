@@ -290,18 +290,21 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
                 result = data.getFloatArrayExtra("result");
                 Log.v("minkj1992", "딥러닝 분석 저장완료");
                 switchFragment(7);
-                //Firebase save button render
-                //Reset button
-                //우선 fragment 생성하고
-                //fragment에서 login ,upload, Result, Gallery
-                //생성된 Result fragment에서 값을 보여주고, 저장 버튼 보여준다.
-                // result,
-                //TODO 여기서 부터 만지면 됩니당.
+
 
             }
         }
     }
 
+
+
+    //Firebase save button render
+    //Reset button
+    //우선 fragment 생성하고
+    //fragment에서 login ,upload, Result, Gallery
+    //생성된 Result fragment에서 값을 보여주고, 저장 버튼 보여준다.
+    // result,
+    //TODO 여기서 부터 만지면 됩니당.
 
     //#######################################  Ucrop & Camera  #########################################
     private void openImagesDocument() {
@@ -734,10 +737,12 @@ public class MainActivity extends AppCompatActivity implements IImagePickerListe
                 break;
             case 5:
                 relativeLayout.setVisibility(View.VISIBLE);
-
+                fragment_container.setVisibility(View.GONE);
+                firebaseLayout.setVisibility(View.GONE);
                 break;
             case 7:
                 Log.v("minkj1992", "switchFragment's Result case 불려짐");
+                fragment_container.setVisibility(View.VISIBLE);
                 fr = new Result(result, gray);
                 relativeLayout.setVisibility(View.GONE);
 

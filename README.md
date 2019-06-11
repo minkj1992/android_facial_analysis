@@ -1,4 +1,60 @@
-# 딥러닝 관상 모델링
+> 2019 아주대 모바일프로그래밍 얼굴 분석기 최종 발표를 위해서, 코딩했던 시행착오들과 소스코드들을 모아놓은 repo입니다.
+
+> 프로젝트를 확인하고 싶으시다면 [/cropMaterial/androidCropKeras](https://github.com/minkj1992/android_facial_analysis/tree/master/cropMaterial/androidCropKeras)에서 확인해주세요.
+
+- `프로젝트 주제`: 얼굴 이미지를 5가지값으로 관상분석 딥러닝하여 `근력`,`지력`,`재력`,`카리스마`,`범죄력`을 보여주고, 다른 사람들의 분석결과를 공유할 수 있는 `Android App`(`JAVA`).
+
+- `키워드 for deeplearning :`
+    - `Keras`,`Multiple outputs and multiple losses`, `tflite converter`, `grayscale image with 3channel`, `inception-v3`, `OVA`, `multiple binary classification`, `multiple sigmoid activation`
+
+- `키워드 for android : `
+    - `tflite.interpreter`, `glide for bitmap`, `bitmap resizing`, `bitmap grayscale`, `cropping`, `fragment`, `framelayout`, `fragment switching with nav bar material`, `firestore` ,`firebaseAuth`,`firestorage`,`CircularFillableLoaders`, `splashscreen`, `LocalBroadcastManager`, `intent Update`  ...
+
+
+
+
+------------------
+# `전반적인 폴더 설명 `
+
+- `/Camera2`
+    - 카메라 2를 활용한 사진 찍기 및 저장
+- `/CameraX` 
+    - 안드로이드 cameraX(`androidX ver`)사용, `ucrop`과의 호환성 문제로 부착 실패
+`/ItcMyFirebaseAuth`
+    - [튜토리얼 참고자료](https://iteritory.com/android-firebase-authentication-tutorial-using-firebase-ui/)
+    - `firebaseUI` + [`Mikepenz's MaterialDrawer`](https://github.com/mikepenz/MaterialDrawer)(material design이 적용된 android nav bar)
+- `/Keras`
+    - android에 사용될 얼굴분석 keras 모델과, 이를 `tflite`화 시킬 코드 및 tflite파일(실제 tflite화는 pip 라이브러리 충돌로 인하여 google colab에서 적용하였다.)
+- `/androidKerasMnist`
+    - `tflite`를 활용해서 안드로이드에서 Mnist를 분석할 수 있는 튜토리얼
+    - `Mnist` 모델 + `touchscreenDrawer` + `resultView`
+    - 화면에서 터치스크린에 숫자를 작성해서 submit을 누르면, 분석 결과를 `resultView`에서 보여준다.
+    - 이때 분석에 걸린 시간과, 정확도 수치가 나타난다.
+
+- `/onlyImageCrop.zip`
+    - 안드로이드 imageCropper인 [`UCrop`](https://github.com/Yalantis/uCrop)을 활용하여 사진찍기 및 crop하는 app
+    - only `Ucrop`
+
+- `/cropMaterial/AndroidImageCrop`
+    - `UCrop` + `mikepenz/Drawer` 시킨 파일
+    - `dependency` 문제 해결 완료
+    - `sidebar(nav)`와 `imageView(for pick picture)`를 결합시킨 app
+
+- `/cropMaterial/androidCropKeras`
+    - 메인 프로젝트로 최종 결과물 모두 존재
+    - `tflite` + `AndroidImageCrop` + `materialDesign` + `fragment & framelayout` +    
+
+- `/materialDesign`
+    - 갤러리 형식으로, image를 flip 시켜서 보여주는 material app 
+    - [참고자료](https://github.com/Yalantis/FlipViewPager.Draco)
+
+- `/giterror.md`
+    - git을 사용하면서 맞이한, error들 모아놓은 자료
+
+-------------------
+
+
+# `딥러닝 모델링(관상)`
 
 ## 모델링 생성 문제점
 학습에 사용할 y는 [1,0,0,0,0]이런식으로 y 라벨이 1개만 true인 값이다.
@@ -34,7 +90,7 @@
   - 이렇게 할 경우 근력의 80점과 범죄력의 80점이 동등한 값이라고 말할 수 없다는 단점을 가짐. 다만 고른 결과 수치값을 가질 수 있다.(절대적 비교 불가)
   
 
-# 안드로이드
+# `안드로이드`
 - `firebaseUI` 로그인 페이지 생성
 - `Camera`
     - Preview 제공
@@ -90,9 +146,8 @@
     - `alterdb()`
 - 저장되는 것 까지 완료(UID가 `document`의 id가 되도록 설정)
 
-### 앞으로 할일
-- picture 이미지를 firebase storage에 저장 후 그 ref를 `pid`로 저장시키기
-- 값 받아와서 material radar형식으로 보여주기
+### `앞으로 할일`
+
 - 갤러리 형식으로 보여주고 filter 적용하기
 
 
