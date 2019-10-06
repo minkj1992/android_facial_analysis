@@ -56,7 +56,7 @@
 
 # `딥러닝 모델링(관상)`
 [세부사항 정리 문서](https://github.com/minkj1992/android_facial_analysis/tree/master/Keras)
-
+[tflite화](https://github.com/minkj1992/android_facial_analysis/blob/master/tensorflow_lite_android.md)
 ## 모델링 생성 문제점
 학습에 사용할 y는 [1,0,0,0,0]이런식으로 y 라벨이 1개만 true인 값이다.
 하지만 이후 predict에서는 5가지 카테고리에 대하여 sigmoid 값을 뽑아내는 녀석인데 
